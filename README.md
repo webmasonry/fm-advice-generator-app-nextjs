@@ -1,7 +1,7 @@
 # Advice Generator App: Next.js
 
 My solution to the [Advice generator app](https://www.frontendmentor.io/challenges/advice-generator-app-QdUG-13db) challenge on Frontend Mentor, built with Next.js 16, React 19, TypeScript and Tailwind CSS v4.
-- **Live site:** _add your Vercel URL here_
+- **Live site:** https://fm-advice-generator-app-nextjs.vercel.app
 - **Study guide:** [STUDY_GUIDE.md](STUDY_GUIDE.md) is a write-up of everything I learned building this, aimed at anyone else learning Next.js (especially coming from Astro).
 
 ## The challenge
