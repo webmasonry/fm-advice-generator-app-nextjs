@@ -9,7 +9,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  description: "Frontend Mentor Advice Generator App, build with nextjs.",
+  description: "Frontend Mentor Advice Generator App, built with Next.js",
   icons: {
     icon: "/favicon-32x32.png",
   },

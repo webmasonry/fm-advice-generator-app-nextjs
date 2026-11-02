@@ -224,7 +224,13 @@
         "preset": "recommended"
       },
       "suspicious": {
-        "noConsole": "warn",
+        "noConsole": {
+          "fix": "safe",
+          "level": "error",
+          "options": {
+            "allow": ["error"]
+          }
+        },
         "noEmptyInterface": "off",
         "noReactSpecificProps": "off",
         "preset": "recommended"
