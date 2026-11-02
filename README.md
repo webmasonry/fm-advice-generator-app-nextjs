@@ -47,6 +47,7 @@ lib/getAdvice.ts         Shared  The only code that talks to the API. Validates 
 - [Tailwind CSS v4](https://tailwindcss.com/)
 - [Zod](https://zod.dev/) for runtime validation
 - [Biome](https://biomejs.dev/) for linting and formatting
+- [Vitest](https://vitest.dev/) for unit tests
 
 ## Running locally
 
@@ -58,9 +59,23 @@ pnpm next dev          # development server at http://localhost:3000
 pnpm next build        # production build
 pnpm next start        # serve the production build
 pnpm biome check .     # lint + format check
+pnpm exec vitest       # unit tests (watch mode); `vitest run` runs once
 ```
 
 If a change to `@theme` in `globals.css` doesn't show up, stop the dev server, delete `.next`, and start it again. The build cache can hold on to an old Tailwind theme.
+
+## Testing
+
+`lib/getAdvice.test.ts` covers the one function with real logic, `getAdvice`, with one test per outcome:
+
+| Test             | Fake `fetch`                      | Expected                                |
+| ---------------- | --------------------------------- | --------------------------------------- |
+| valid response   | resolves with a correct slip      | resolves with `{ id, advice }`          |
+| server error     | resolves with status 500          | rejects with `"Advice API failed: 500"` |
+| wrong data shape | resolves with `i` instead of `id` | rejects with a `ZodError`               |
+| network failure  | rejects with a `TypeError`        | rejects with a `TypeError`              |
+
+`fetch` is replaced with a fake (`vi.stubGlobal`), so the tests never call the real API and run in milliseconds. Each test checks the _specific_ error, so it fails if the wrong line catches the problem. For example, removing the `response.ok` check makes the 500 test fail instead of passing on Zod's error.
 
 ## Deploying
 
@@ -86,3 +101,4 @@ The short version is below. The full version, with diagrams and a self-quiz, is 
 - Handle errors where they happen: an error page when there's nothing to show, an inline message when there's still good content on screen.
 - Image `width`/`height` prevent layout shift; "optimization" (resizing, WebP/AVIF) is a separate thing and doesn't apply to SVGs.
 - Measure performance on a production build, never on the dev server.
+- A test only proves something if you've seen it fail. Assert the specific error, not just "it threw".

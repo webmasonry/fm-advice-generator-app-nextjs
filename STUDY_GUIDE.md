@@ -14,9 +14,10 @@ Each section ends with a short **Check yourself** question. The answers are in c
 7. [Fonts](#7-fonts)
 8. [Tailwind v4 notes](#8-tailwind-v4-notes)
 9. [Debugging lessons](#9-debugging-lessons)
-10. [Deploying](#10-deploying)
-11. [Glossary](#11-glossary)
-12. [What I thought vs what's true](#12-what-i-thought-vs-whats-true)
+10. [Testing](#10-testing)
+11. [Deploying](#11-deploying)
+12. [Glossary](#12-glossary)
+13. [What I thought vs what's true](#13-what-i-thought-vs-whats-true)
 
 ---
 
@@ -481,7 +482,95 @@ Then connect it to Tailwind. There are two ways, and this project uses the first
 
 ---
 
-## 10. Deploying
+## 10. Testing
+
+### What to test
+
+Test code that has **logic**: branches, failure cases, data transformation. In this app that's `getAdvice`: one way to succeed and three ways to fail, so four tests. The JSX and Tailwind classes have no logic worth unit testing. For those, you look in the browser.
+
+```sh
+pnpm add -D vitest
+pnpm exec vitest        # watch mode: reruns on save
+pnpm exec vitest run    # run once (e.g. in CI)
+```
+
+Vitest finds files named `*.test.ts` automatically. No config is needed for plain TypeScript functions like this one.
+
+### `fetch` has only two outcomes
+
+This is the key to faking it:
+
+| Situation                                                  | What `fetch` does              |
+| ---------------------------------------------------------- | ------------------------------ |
+| The server answered, **with any status** (200, 404, 500)   | **resolves** with a `Response` |
+| No answer at all: offline, DNS failure, connection dropped | **rejects** with a `TypeError` |
+
+A 500 still counts as an answer, so `fetch` resolves. That's why `getAdvice` needs its own `if (!response.ok)` check.
+
+### Faking `fetch`
+
+Tests should never call the real API. It's slow, random, and can be down. Replace the global `fetch` with a fake:
+
+```ts
+afterEach(() => vi.unstubAllGlobals()); // restore the real fetch after each test
+
+function mockFetch(body: unknown, status = 200) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(body), { status })),
+  );
+}
+
+function mockNetworkError() {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
+  );
+}
+```
+
+`mockResolvedValue` simulates "the server answered", and `mockRejectedValue` simulates "no answer". Name the helpers after the situation they simulate, not after the Vitest method they call.
+
+### Every test has three steps
+
+```ts
+it("throws when the API responds with 500", async () => {
+  mockFetch({}, 500); // 1. set up
+  await expect(getAdvice()).rejects.toThrow("Advice API failed: 500"); // 2. call + 3. check
+});
+```
+
+- `.resolves` checks success, and `.rejects` checks failure.
+- **A test with no check always passes.** An empty `it("…", async () => {})` shows up as green in the results. It proves nothing.
+
+### Check the _specific_ error
+
+| Test        | Check                                        |
+| ----------- | -------------------------------------------- |
+| 500         | `.rejects.toThrow("Advice API failed: 500")` |
+| wrong shape | `.rejects.toThrow(ZodError)`                 |
+| network     | `.rejects.toThrow(TypeError)`                |
+
+A bare `.rejects.toThrow()` passes for _any_ error. Try this: delete the `response.ok` check. The 500 test still gets an error, because the empty `{}` body fails Zod. With a bare `toThrow()`, the test would still pass and hide the missing check. With `toThrow("Advice API failed: 500")`, it fails as it should.
+
+### Watch every test fail once
+
+Break the code on purpose (remove a check, rename a field), run the tests, and confirm the _right_ test fails with a useful message. Then undo it. A test you've never seen fail might not be testing anything.
+
+<details>
+<summary><b>Check yourself:</b> All four tests pass. Name something that could still break in production that they wouldn't catch.</summary>
+
+Several things:
+- **The real API changes its URL or goes away.** The tests use a fake `fetch`, so they never touch the real endpoint.
+- **The component's behavior:** the duplicate retry loop, the error message, the disabled button. None of that is tested. Testing it would need a component test (for example React Testing Library) or an end-to-end test (Playwright) that clicks the real button.
+- **Styling and layout:** unit tests don't render anything.
+
+Unit tests prove that _your function handles each situation correctly_. They don't prove that the whole app works. That takes other kinds of tests, plus looking at it.
+</details>
+
+---
+
+## 11. Deploying
 
 ### Four ways to run the app
 
@@ -534,7 +623,7 @@ For this app, going static means choosing when the first advice is fetched: at b
 
 ---
 
-## 11. Glossary
+## 12. Glossary
 
 | Term                            | Meaning                                                                                          |
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -549,13 +638,15 @@ For this app, going static means choosing when the first advice is fetched: at b
 | **Streaming**                   | Sending HTML in chunks as it becomes ready instead of all at once.                               |
 | **CLS**                         | Cumulative Layout Shift: how much content jumps around while loading.                            |
 | **LCP**                         | Largest Contentful Paint: when the biggest visible element finishes rendering.                   |
+| **Mock / stub**                 | A fake stand-in for something real (here, `fetch`), so a test controls exactly what it returns.  |
+| **Assertion**                   | The check in a test (`expect(...).toEqual(...)`). No assertion means the test proves nothing.    |
 | **CDN**                         | Servers around the world that serve static files from close to the visitor.                      |
 | **Error boundary**              | A component that shows a fallback when something inside it throws while rendering (`error.tsx`). |
 | **Live region**                 | An element (`role="status"`) whose text changes are read aloud by screen readers.                |
 
 ---
 
-## 12. What I thought vs what's true
+## 13. What I thought vs what's true
 
 | I thought…                                                                            | Actually…                                                                                                                                                |
 | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -571,6 +662,7 @@ For this app, going static means choosing when the first advice is fetched: at b
 | "Any failure should go to the error page."                                            | Only when there's nothing left to show. A failed click keeps the old advice and shows an inline message.                                                 |
 | "I should avoid any server work, like on static hosting."                             | One small function per visit easily fits the free plan. Static is possible (`ensureStatic`, `output: "export"`), but it changes when data is fetched.    |
 | "`vercel` without `--prod` is a safe test run."                                       | It deploys a preview. On a brand-new project, the first deploy becomes production. Test locally with `next build && next start`.                         |
+| "Passing tests mean the code is tested."                                              | An empty test passes, and so does a bare `toThrow()` that catches the wrong error. Check specific results, and watch each test fail once.                |
 
 ---
 
