@@ -14,8 +14,9 @@ Each section ends with a short **Check yourself** question. The answers are in c
 7. [Fonts](#7-fonts)
 8. [Tailwind v4 notes](#8-tailwind-v4-notes)
 9. [Debugging lessons](#9-debugging-lessons)
-10. [Glossary](#10-glossary)
-11. [What I thought vs what's true](#11-what-i-thought-vs-whats-true)
+10. [Deploying](#10-deploying)
+11. [Glossary](#11-glossary)
+12. [What I thought vs what's true](#12-what-i-thought-vs-whats-true)
 
 ---
 
@@ -480,7 +481,60 @@ Then connect it to Tailwind. There are two ways, and this project uses the first
 
 ---
 
-## 10. Glossary
+## 10. Deploying
+
+### Four ways to run the app
+
+| Purpose                       | Command                              | Where it runs                             |
+| ----------------------------- | ------------------------------------ | ----------------------------------------- |
+| Building features, hot reload | `pnpm next dev`                      | your machine, dev mode (slow, unminified) |
+| Checking production behavior  | `pnpm next build && pnpm next start` | your machine, production mode             |
+| Checking on the real platform | `pnpm vercel`                        | Vercel, at a **preview** URL              |
+| Going live                    | `pnpm vercel --prod`                 | Vercel, at your **production** URL        |
+
+`next build && next start` is the local "like it's deployed" mode: minified code, real Partial Prerendering, real caching, and the Lighthouse score that counts. It catches most "works in dev, breaks in prod" problems without anything leaving your machine.
+
+### Coming from Wrangler
+
+| Wrangler / Astro                   | Vercel                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------- |
+| `wrangler login`                   | `vercel login`                                                            |
+| `wrangler.toml`                    | `vercel link` → `.vercel/project.json` (generated, git-ignored, just IDs) |
+| `wrangler dev` (runtime emulation) | no emulator: use `next build && next start` locally, or a preview deploy  |
+| `wrangler deploy`                  | `vercel --prod`                                                           |
+| `wrangler secret put`              | `vercel env add` / `vercel env pull`                                      |
+- **No config file is needed.** Vercel detects Next.js and pnpm. `vercel.json` only exists for overrides like redirects or headers, and those usually go in `next.config.ts` anyway.
+- **Every `vercel` command deploys.** Even without `--prod`, it uploads and builds on Vercel. For a local run, use `next build && next start`.
+- **The first deploy of a new project always becomes production**, because there's nothing live yet. I found this out by accident: I wanted a local test and ran `vercel`.
+- **Two kinds of URLs:** `project-name.vercel.app` always points to the latest production deploy, so share that one. Each deploy also gets its own frozen URL (`project-name-abc123-team.vercel.app`), which is login-protected by default.
+- **Git integration is optional.** Connect the GitHub repo in the dashboard and every push to `main` deploys to production, while other branches get preview URLs. CLI deploys and Git deploys work side by side.
+
+### Do I need to avoid server work?
+
+Coming from static hosting, I wanted zero server work. For this app:
+- **Server:** one small function per page visit, to fetch the first advice. Most of its ~0.5s is spent waiting on the API, not computing.
+- **Browser:** every dice click fetches straight from the advice API. My server isn't involved.
+- **CDN:** the shell, JS bundles, SVGs and font are static files.
+
+That fits easily in Vercel's free Hobby plan. Hobby is for **non-commercial** use, so a paid client site needs Pro or another host.
+
+If you really want zero server work, Next.js can do that too:
+- **Static routes:** a route with no request-time data is built once and served from the CDN. `export const ensureStatic = "navigation"` makes the build fail if that ever changes.
+- **Static export:** `output: "export"` in `next.config.ts` builds plain files into `out/`, which any static host (Cloudflare Pages, GitHub Pages, Netlify) can serve. No Server Actions, cookies, request-time rendering, or default image optimization.
+
+For this app, going static means choosing when the first advice is fetched: at build time (same advice for everyone until the next deploy), or in the browser (a loading state on every visit). For a Next.js portfolio piece, I kept the server rendering, because using the server well is the skill to show.
+
+**Deploying to Cloudflare instead:** the [OpenNext](https://opennext.js.org/cloudflare) adapter (`@opennextjs/cloudflare`) turns a Next build into a Worker that you deploy with Wrangler. It's worth trying, but newer Next features can lag behind there.
+
+<details>
+<summary><b>Check yourself:</b> You want to see your latest change running in production mode before anyone else can see it. Which command?</summary>
+
+`pnpm next build && pnpm next start` runs it locally, and nothing is uploaded. If you need the real platform (CDN, functions), use `pnpm vercel` for a preview deploy. That's fine once the project already has a production deploy. On a brand-new project it would _become_ production.
+</details>
+
+---
+
+## 11. Glossary
 
 | Term                            | Meaning                                                                                          |
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -501,7 +555,7 @@ Then connect it to Tailwind. There are two ways, and this project uses the first
 
 ---
 
-## 11. What I thought vs what's true
+## 12. What I thought vs what's true
 
 | I thought…                                                                            | Actually…                                                                                                                                                |
 | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -515,6 +569,8 @@ Then connect it to Tailwind. There are two ways, and this project uses the first
 | "My Lighthouse score is terrible."                                                    | It was the dev server. Production scored 98.                                                                                                             |
 | "I need the status code from `getAdvice` to handle errors."                           | It already throws for every failure. The UI only needs to know _that_ it failed (and whether the user is offline).                                       |
 | "Any failure should go to the error page."                                            | Only when there's nothing left to show. A failed click keeps the old advice and shows an inline message.                                                 |
+| "I should avoid any server work, like on static hosting."                             | One small function per visit easily fits the free plan. Static is possible (`ensureStatic`, `output: "export"`), but it changes when data is fetched.    |
+| "`vercel` without `--prod` is a safe test run."                                       | It deploys a preview. On a brand-new project, the first deploy becomes production. Test locally with `next build && next start`.                         |
 
 ---
 

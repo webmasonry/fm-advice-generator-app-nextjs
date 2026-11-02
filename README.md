@@ -62,6 +62,21 @@ pnpm biome check .     # lint + format check
 
 If a change to `@theme` in `globals.css` doesn't show up, stop the dev server, delete `.next`, and start it again. The build cache can hold on to an old Tailwind theme.
 
+## Deploying
+
+Hosted on [Vercel](https://vercel.com/) (free Hobby plan). No config file is needed: Vercel detects Next.js and pnpm on its own.
+
+```sh
+pnpm vercel login      # once
+pnpm vercel link       # once: connects this folder to a Vercel project (.vercel/, git-ignored)
+pnpm vercel            # preview deploy: unique URL, production untouched
+pnpm vercel --prod     # production deploy
+```
+
+- **To test locally the way it runs in production**, use `pnpm next build && pnpm next start`, not `vercel`. Every `vercel` command deploys something.
+- **The first deploy of a new project always goes to production**, even without `--prod`, because nothing is live yet.
+- **Server cost:** each page visit runs one small server function (fetching the first advice). Clicks fetch from the advice API directly in the browser, and everything else is served as static files from the CDN.
+
 ## What I learned
 
 The short version is below. The full version, with diagrams and a self-quiz, is in [STUDY_GUIDE.md](STUDY_GUIDE.md).
