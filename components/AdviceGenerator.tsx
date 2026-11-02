@@ -10,14 +10,22 @@ import { getAdvice, type Slip } from "@/lib/getAdvice";
 type Props = Slip;
 
 export default function AdviceGenerator({ advice, id }: Props) {
+  const [error, setError] = useState<string | null>(null);
   const [slip, setSlip] = useState<Slip>({ advice, id });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchAdviceOnClick = async () => {
     setIsLoading(true);
+    setError(null);
 
     try {
       setSlip(await getAdvice());
+    } catch {
+      setError(
+        navigator.onLine
+          ? "Couldn't get new advice. Try again."
+          : "You're offline. Reconnect and try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -31,7 +39,7 @@ export default function AdviceGenerator({ advice, id }: Props) {
       <p className="text-light-cyan desktop:mb-10 desktop:text-[28px] desktop:tracking-[-0.3px] font-manrope mb-6 text-center text-[24px] leading-[normal] font-extrabold tracking-[-0.257px] not-italic">
         {slip.advice}
       </p>
-      <picture className="desktop:mb-18 mb-16">
+      <picture>
         <source
           height={dividerDesktopSVG.height}
           media="(min-width: 1440px)"
@@ -45,6 +53,12 @@ export default function AdviceGenerator({ advice, id }: Props) {
           width={dividerMobileSVG.width}
         />
       </picture>
+      <p
+        className="text-light-cyan no-ligatures desktop:text-[13px] desktop:tracking-[3.73px] font-manrope desktop:mb-18 desktop:not-empty:mt-10 mb-16 text-center text-[11px] leading-[normal] font-extrabold tracking-[3.22px] uppercase not-italic not-empty:mt-6"
+        role="status"
+      >
+        {error}
+      </p>
       <button
         aria-label="generate new advice"
         className="bg-neon-green absolute right-1/2 bottom-0 flex size-16 translate-1/2 cursor-pointer items-center justify-center rounded-full hover:shadow-[0_0_40px_0_#53ffaa] disabled:cursor-wait disabled:opacity-60"
