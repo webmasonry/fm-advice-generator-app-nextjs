@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --dark-blue: #202733;
+  --dark-grayish-blue: #313a48;
+  --grayish-blue: #4f5d74;
+  --light-cyan: #cee3e9;
+  --neon-green: #53ffaa;
+}
+
+@theme inline {
+  --breakpoint-desktop: 1440px;
+
+  --color-*: initial;
+  --color-dark-blue: var(--dark-blue);
+  --color-dark-grayish-blue: var(--dark-grayish-blue);
+  --color-grayish-blue: var(--grayish-blue);
+  --color-light-cyan: var(--light-cyan);
+  --color-neon-green: var(--neon-green);
+
+  --font-manrope: var(--font-manrope);
+}
+
+@utility no-ligatures {
+  font-feature-settings:
+    "liga" off,
+    "clig" off;
+}

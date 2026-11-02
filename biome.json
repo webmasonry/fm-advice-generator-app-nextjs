@@ -1,0 +1,242 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "assist": {
+    "actions": {
+      "preset": "recommended",
+      "source": {
+        "noDuplicateClasses": "on",
+        "organizeImports": "on",
+        "preset": "recommended",
+        "useSortedAttributes": "on",
+        "useSortedEnumMembers": "on",
+        "useSortedInterfaceMembers": "on",
+        "useSortedKeys": "on",
+        "useSortedPackageJson": "off",
+        "useSortedProperties": "on",
+        "useSortedSelectionSet": "on",
+        "useSortedTypeFields": "on"
+      }
+    },
+    "enabled": true
+  },
+  "css": {
+    "assist": {
+      "enabled": true
+    },
+    "formatter": {
+      "delimiterSpacing": false,
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "lineWidth": 80,
+      "quoteStyle": "double",
+      "trailingNewline": true
+    },
+    "globals": [],
+    "linter": {
+      "enabled": true
+    },
+    "parser": {
+      "allowWrongLineComments": false,
+      "cssModules": false,
+      "tailwindDirectives": true
+    }
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**", "!.next", "!assets", "!build", "!dist", "!node_modules"]
+  },
+  "formatter": {
+    "attributePosition": "auto",
+    "bracketSameLine": false,
+    "bracketSpacing": true,
+    "delimiterSpacing": false,
+    "enabled": true,
+    "expand": "auto",
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "trailingNewline": true,
+    "useEditorconfig": false
+  },
+  "graphql": {
+    "assist": {
+      "enabled": true
+    },
+    "formatter": {
+      "bracketSpacing": true,
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "lineWidth": 80,
+      "quoteStyle": "double",
+      "trailingNewline": true
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "grit": {
+    "assist": {
+      "enabled": true
+    },
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "lineWidth": 80,
+      "trailingNewline": true
+    },
+    "linter": {
+      "enabled": false
+    }
+  },
+  "html": {
+    "assist": {
+      "enabled": true
+    },
+    "experimentalFullSupportEnabled": true,
+    "formatter": {
+      "attributePosition": "auto",
+      "bracketSameLine": false,
+      "enabled": true,
+      "indentScriptAndStyle": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "lineWidth": 80,
+      "selfCloseVoidElements": "always",
+      "trailingNewline": true,
+      "whitespaceSensitivity": "css"
+    },
+    "linter": {
+      "enabled": true
+    },
+    "parser": {
+      "interpolation": true,
+      "vue": true
+    }
+  },
+  "javascript": {
+    "assist": {
+      "enabled": true
+    },
+    "experimentalEmbeddedSnippetsEnabled": true,
+    "formatter": {
+      "arrowParentheses": "always",
+      "attributePosition": "auto",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "delimiterSpacing": false,
+      "enabled": true,
+      "expand": "auto",
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "jsxQuoteStyle": "double",
+      "lineEnding": "lf",
+      "lineWidth": 80,
+      "operatorLinebreak": "after",
+      "quoteProperties": "asNeeded",
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "trailingNewline": true
+    },
+    "globals": [],
+    "linter": {
+      "enabled": true
+    },
+    "parser": {
+      "jsxEverywhere": true,
+      "unsafeParameterDecoratorsEnabled": false
+    },
+    "resolver": {
+      "experimentalPnpmCatalogs": true
+    }
+  },
+  "json": {
+    "assist": {
+      "enabled": true
+    },
+    "formatter": {
+      "bracketSpacing": true,
+      "delimiterSpacing": false,
+      "enabled": true,
+      "expand": "auto",
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "lineWidth": 80,
+      "trailingCommas": "none",
+      "trailingNewline": true
+    },
+    "linter": {
+      "enabled": true
+    },
+    "parser": {
+      "allowComments": false,
+      "allowTrailingCommas": false
+    }
+  },
+  "linter": {
+    "domains": {
+      "astro": "recommended",
+      "drizzle": "recommended",
+      "playwright": "recommended",
+      "react": "recommended",
+      "solid": "recommended",
+      "svelte": "recommended",
+      "tailwind": "recommended",
+      "test": "recommended",
+      "types": "recommended",
+      "vue": "recommended"
+    },
+    "enabled": false,
+    "rules": {
+      "a11y": {
+        "preset": "recommended"
+      },
+      "complexity": {
+        "preset": "recommended"
+      },
+      "correctness": {
+        "preset": "recommended"
+      },
+      "nursery": {
+        "useTailwindSortedClasses": {
+          "fix": "safe",
+          "level": "error"
+        }
+      },
+      "performance": {
+        "preset": "recommended"
+      },
+      "preset": "recommended",
+      "security": {
+        "preset": "recommended"
+      },
+      "style": {
+        "preset": "recommended"
+      },
+      "suspicious": {
+        "noConsole": "warn",
+        "noEmptyInterface": "off",
+        "noReactSpecificProps": "off",
+        "preset": "recommended"
+      }
+    }
+  },
+  "overrides": [],
+  "plugins": [],
+  "root": true,
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
+}
