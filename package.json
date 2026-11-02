@@ -22,7 +22,8 @@
   "scripts": {
     "biome": "biome",
     "next": "next",
-    "vercel": "vercel"
+    "vercel": "vercel",
+    "vitest": "vitest"
   },
   "version": "1.0.0"
 }
